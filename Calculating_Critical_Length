@@ -1,0 +1,42 @@
+clear
+aA=0.001; %Initial guess of 1mm
+aB=0.001; %Initial guess of 1mm
+h=731; %Water hammer hight
+UTSA=800e6;
+UTSB=500e6;
+p=h*1000*9.81;
+yieldA=700e6;
+yieldB=350e6;
+r=2.3/2;
+KICA=100e6;
+KICB=130e6;
+Residual=70e6;
+%Design Requirement:-
+%Hoop Stress + Residual Stress= Total Stress = 0.6*Yield Stress
+TotalStressA=0.6*yieldA;
+TotalStressB=0.6*yieldB;
+HoopStressA=TotalStressA-Residual;
+HoopStressB=TotalStressB-Residual;
+thicknessA=p*r/(HoopStressA);
+thicknessB=p*r/(HoopStressB);
+syms A W
+YA=0.265*((1-A/W)^4)+((0.875+0.265*A/W)/((1-A/W)^(3/2)));
+YB=0.265*((1-A/W)^4)+((0.875+0.265*A/W)/((1-A/W)^(3/2)));
+funcTemp(1)=YA*TotalStressA*sqrt(pi*A)-KICA;
+funcTemp(2)=YB*TotalStressB*sqrt(pi*A)-KICB;
+diffTemp(1)=diff(funcTemp(1),A,1); %Differentiating the above function for A
+diffTemp(2)=diff(funcTemp(2),A,1); %Differentiating the above function for B
+for i=1:20
+functionA=double(subs(funcTemp(1),[A,W],[aA,thicknessA])); %Substituting the values back into the equation for A
+functionB=double(subs(funcTemp(2),[A,W],[aB,thicknessB])); %Substituting the values back into the equation for B
+diffunctionA=double(subs(diffTemp(1),[A,W],[aA,thicknessA]));%Substituting the values back into the equation for A
+diffunctionB=double(subs(diffTemp(2),[A,W],[aB,thicknessB]));%Substituting the values back into the equation for B
+Y1(i)=double(subs(YA,[A,W],[aA,thicknessA]));%Substituting the values back into the equation for A
+Y2(i)=double(subs(YB,[A,W],[aA,thicknessB]));%Substituting the values back into the equation for B
+aAnew=aA-functionA/diffunctionA;
+aBnew=aB-functionB/diffunctionB;
+acr(1,i)=aAnew;
+acr(2,i)=aBnew;
+aA=acr(1,i);
+aB=acr(2,i);
+end
