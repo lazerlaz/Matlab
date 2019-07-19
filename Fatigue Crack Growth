@@ -1,0 +1,31 @@
+clear
+p=5.46; %Working load calculated using the water head (557m)
+r=2.3/2;
+thickness=0.085;
+deltasigma=p*r/thickness;
+af=0.0312;
+ai=0.005;
+da=(ai+af)/500; %500 values of crack sizes are used
+C=1e-11;
+m=3;
+%Initialising the crack length and number of cycles
+a=ai;
+N=0;
+for i=1:500
+Y=0.265*((1-a/thickness)^4)+((0.875+0.265*a/thickness)/((1-a/thickness)^(3/2)));
+dk=Y*deltasigma*sqrt(pi*a);
+dadN=C*(dk^m);
+dN=da/dadN;
+N=N+dN;
+time(i)=N/7500;%Converting number of cylces to years
+a=a+da;
+end
+%Plot Commands
+a=linspace(ai,af,500)*1000;
+title('Crack Length propagation over time');
+plot(time,a,'LineWidth',2);
+xlabel('Life time in years');
+ylabel('Crack Length a in mm');
+grid on
+set(gca,'GridLineStyle','-')
+hold on
